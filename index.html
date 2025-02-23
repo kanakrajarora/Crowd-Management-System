@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crowd Monitoring Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #ecf0f1;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--secondary-color);
+        }
+        .navbar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--box-shadow);
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+        .box:hover {
+            transform: translateY(-5px);
+        }
+        h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .alert {
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Crowd Monitoring Dashboard</h1>
+    </nav>
+    <div class="container">
+        <div class="box">
+            <h2>Live Video Feed</h2>
+            <div class="video-container">
+                <video id="videoFeed" autoplay loop muted>
+                    <source src="gettyimages-514539492-640_adpp.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+        <div class="box">
+            <h2>Graphical Dashboard</h2>
+            <div class="chart-container">
+                <canvas id="crowdTrendsChart"></canvas>
+            </div>
+            <div id="alertBox" class="alert">
+                <span id="alertMessage"></span>
+            </div>
+        </div>
+        <div class="box">
+            <h2>Heatmap View</h2>
+            <div class="video-container">
+                <video id="heatmapVideo" autoplay loop muted>
+                    <source src="output_video.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+        <div class="box">
+            <h2>Prediction Chart</h2>
+            <div class="chart-container">
+                <canvas id="predictionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Crowd Trends Chart
+        const crowdTrendsCtx = document.getElementById('crowdTrendsChart').getContext('2d');
+        const crowdTrendsChart = new Chart(crowdTrendsCtx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                datasets: [{
+                    label: 'Crowd Size',
+                    data: [50, 30, 100, 200, 150, 80],
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of People'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Prediction Chart
+        const predictionCtx = document.getElementById('predictionChart').getContext('2d');
+        const predictionChart = new Chart(predictionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['1h', '2h', '3h', '4h', '5h', '6h'],
+                datasets: [{
+                    label: 'Predicted Crowd Size',
+                    data: [120, 150, 180, 200, 170, 140],
+                    backgroundColor: 'rgba(46, 204, 113, 0.6)',
+                    borderColor: 'rgba(46, 204, 113, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Predicted Number of People'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Hours from Now'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Simulated real-time updates
+        function simulateRealTimeUpdates() {
+            // Update crowd trends
+            crowdTrendsChart.data.datasets[0].data = crowdTrendsChart.data.datasets[0].data.map(() => 
+                Math.floor(Math.random() * 200) + 50
+            );
+            crowdTrendsChart.update();
+
+            // Update prediction
+            predictionChart.data.datasets[0].data = predictionChart.data.datasets[0].data.map(() => 
+                Math.floor(Math.random() * 100) + 100
+            );
+            predictionChart.update();
+
+            // Simulate alerts
+            const alertThreshold = 30;
+            const currentCrowdSize = crowdTrendsChart.data.datasets[0].data[crowdTrendsChart.data.datasets[0].data.length - 1];
+            const alertBox = document.getElementById('alertBox');
+            const alertMessage = document.getElementById('alertMessage');
+
+            if (currentCrowdSize > alertThreshold) {
+                alertBox.style.display = 'block';
+                alertMessage.textContent = `High crowd density detected: ${currentCrowdSize} people`;
+            } else {
+                alertBox.style.display = 'none';
+            }
+        }
+
+        // Simulate real-time updates every 5 seconds
+        setInterval(simulateRealTimeUpdates, 5000);
+    </script>
+</body>
+</html>
