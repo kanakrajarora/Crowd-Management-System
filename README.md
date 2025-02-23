@@ -21,7 +21,8 @@ This project is an **AI-powered crowd detection and management system** using **
 - **Data Processing:** Pandas, NumPy  
 - **Visualization:** Matplotlib, OpenCV  
 - **Backend (Optional):** Flask for real-time monitoring  
-- **Deployment:** Google Colab / Local Machine  
+- **Deployment:** Google Colab / Local Machine
+- **Frontend:** HTML, CSS, JavaScript
 
 ---
 
